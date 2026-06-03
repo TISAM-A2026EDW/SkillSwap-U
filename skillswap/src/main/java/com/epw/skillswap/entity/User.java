@@ -33,9 +33,11 @@ public class User {
 
     @NotBlank
     private String password;
-
+    
+    @Builder.Default
     private Double currentCreditBalance = 0.0;
 
+    @Builder.Default
     private Double reputationScore = 0.0;
 
     private Boolean verified = false;
