@@ -4,6 +4,7 @@ import com.epw.skillswap.dto.UserDTO;
 import com.epw.skillswap.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,5 +43,18 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID id){
         service.delete(id);
+    }
+
+    @GetMapping("/me")
+    public UserDTO getCurrentUser(Authentication authentication) {
+        UUID userId = service.getUserIdByEmail(authentication.getName());
+        return service.getById(userId);
+    }
+
+    @PutMapping("/me")
+    public UserDTO updateCurrentUser(@RequestBody UserDTO dto,
+                                      Authentication authentication) {
+        UUID userId = service.getUserIdByEmail(authentication.getName());
+        return service.updateProfile(userId, dto);
     }
 }

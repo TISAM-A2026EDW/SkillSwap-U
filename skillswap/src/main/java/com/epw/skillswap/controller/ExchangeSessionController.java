@@ -38,7 +38,20 @@ public class ExchangeSessionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ExchangeSessionDTO>> getAllSessions() {
+    public ResponseEntity<List<ExchangeSessionDTO>> getAllSessions(
+            @RequestParam(required = false) UUID teacherUserId,
+            @RequestParam(required = false) UUID learnerUserId) {
+
+        if (teacherUserId != null) {
+            return ResponseEntity.ok(
+                    sessionService.getSessionsByTeacherUserId(teacherUserId)
+            );
+        }
+        if (learnerUserId != null) {
+            return ResponseEntity.ok(
+                    sessionService.getSessionsByLearnerUserId(learnerUserId)
+            );
+        }
 
         return ResponseEntity.ok(
                 sessionService.getAllSessions()

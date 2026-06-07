@@ -99,6 +99,24 @@ public class ReviewServiceImpl
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<ReviewDTO> getReviewsByReviewedUserId(UUID reviewedUserId) {
+        return reviewRepository.findByReviewedUserId(reviewedUserId)
+                .stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ReviewDTO> getReviewsByReviewerUserId(UUID reviewerUserId) {
+        return reviewRepository.findByReviewerUserId(reviewerUserId)
+                .stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void deleteReview(UUID reviewId) {
 
         Review review = reviewRepository.findById(reviewId)

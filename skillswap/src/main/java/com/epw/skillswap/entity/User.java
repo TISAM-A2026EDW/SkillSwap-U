@@ -45,4 +45,7 @@ public class User {
     private Boolean verified = false;
 
     private LocalDateTime registrationDate = LocalDateTime.now();
+
+    @Column(columnDefinition = "TEXT")
+    private String bio;
 }
