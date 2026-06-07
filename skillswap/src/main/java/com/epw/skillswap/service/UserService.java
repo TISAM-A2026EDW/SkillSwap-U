@@ -15,4 +15,8 @@ public interface UserService {
     UserDTO update(UUID id, UserDTO dto);
 
     void delete(UUID id);
+
+    UUID getUserIdByEmail(String email);
+
+    UserDTO updateProfile(UUID id, UserDTO dto);
 }

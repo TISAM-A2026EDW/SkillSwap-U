@@ -64,6 +64,31 @@ public class UserServiceImpl implements UserService {
         repository.deleteById(id);
     }
 
+    @Override
+    public UUID getUserIdByEmail(String email) {
+        return repository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"))
+                .getUserId();
+    }
+
+    @Override
+    public UserDTO updateProfile(UUID id, UserDTO dto) {
+        User user = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (dto.getFirstName() != null) {
+            user.setFirstName(dto.getFirstName());
+        }
+        if (dto.getLastName() != null) {
+            user.setLastName(dto.getLastName());
+        }
+        if (dto.getBio() != null) {
+            user.setBio(dto.getBio());
+        }
+
+        return mapToDTO(repository.save(user));
+    }
+
     private UserDTO mapToDTO(User user){
         return UserDTO.builder()
                 .userId(user.getUserId())
@@ -72,6 +97,7 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .currentCreditBalance(user.getCurrentCreditBalance())
                 .reputationScore(user.getReputationScore())
+                .bio(user.getBio())
                 .build();
     }
 }

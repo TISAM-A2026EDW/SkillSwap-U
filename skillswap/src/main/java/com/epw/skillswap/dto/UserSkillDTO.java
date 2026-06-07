@@ -9,13 +9,14 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SkillDTO {
+public class UserSkillDTO {
 
+    private UUID userSkillId;
+    private UUID userId;
     private UUID skillId;
     private String skillName;
-    private String description;
     private UUID categoryId;
     private String categoryName;
-    private String difficultyLevel;
+    private String proficiencyLevel;
     private Integer recommendedSessions;
 }

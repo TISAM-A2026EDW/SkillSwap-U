@@ -25,7 +25,11 @@ public class Skill {
 
     private String description;
 
-    private String category;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     private String difficultyLevel;
+
+    private Integer recommendedSessions;
 }

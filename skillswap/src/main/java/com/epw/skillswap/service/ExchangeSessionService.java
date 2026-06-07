@@ -13,6 +13,10 @@ public interface ExchangeSessionService {
 
     List<ExchangeSessionDTO> getAllSessions();
 
+    List<ExchangeSessionDTO> getSessionsByTeacherUserId(UUID teacherUserId);
+
+    List<ExchangeSessionDTO> getSessionsByLearnerUserId(UUID learnerUserId);
+
     ExchangeSessionDTO updateSessionStatus(UUID sessionId, String status);
 
     void deleteSession(UUID sessionId);

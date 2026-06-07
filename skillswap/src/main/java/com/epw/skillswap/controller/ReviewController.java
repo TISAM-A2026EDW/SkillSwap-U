@@ -38,7 +38,20 @@ public class ReviewController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReviewDTO>> getAllReviews() {
+    public ResponseEntity<List<ReviewDTO>> getAllReviews(
+            @RequestParam(required = false) UUID reviewedUserId,
+            @RequestParam(required = false) UUID reviewerUserId) {
+
+        if (reviewedUserId != null) {
+            return ResponseEntity.ok(
+                    reviewService.getReviewsByReviewedUserId(reviewedUserId)
+            );
+        }
+        if (reviewerUserId != null) {
+            return ResponseEntity.ok(
+                    reviewService.getReviewsByReviewerUserId(reviewerUserId)
+            );
+        }
 
         return ResponseEntity.ok(
                 reviewService.getAllReviews()

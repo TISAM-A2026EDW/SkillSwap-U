@@ -2,8 +2,10 @@ package com.epw.skillswap.service.impl;
 
 
 import com.epw.skillswap.dto.SkillDTO;
+import com.epw.skillswap.entity.Category;
 import com.epw.skillswap.entity.Skill;
 import com.epw.skillswap.exception.ResourceNotFoundException;
+import com.epw.skillswap.repository.CategoryRepository;
 import com.epw.skillswap.repository.SkillRepository;
 import com.epw.skillswap.service.SkillService;
 import lombok.RequiredArgsConstructor;
@@ -19,15 +21,22 @@ import java.util.UUID;
 public class SkillServiceImpl implements SkillService {
 
     private final SkillRepository repository;
+    private final CategoryRepository categoryRepository;
 
     @Override
     public SkillDTO create(SkillDTO dto) {
 
+        Category category = dto.getCategoryId() != null
+                ? categoryRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"))
+                : null;
+
         Skill skill = Skill.builder()
                 .skillName(dto.getSkillName())
                 .description(dto.getDescription())
-                .category(dto.getCategory())
+                .category(category)
                 .difficultyLevel(dto.getDifficultyLevel())
+                .recommendedSessions(dto.getRecommendedSessions())
                 .build();
 
         return mapToDTO(repository.save(skill));
@@ -56,8 +65,23 @@ public class SkillServiceImpl implements SkillService {
         Skill skill = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Skill not found"));
 
-        skill.setSkillName(dto.getSkillName());
-        skill.setDescription(dto.getDescription());
+        if (dto.getSkillName() != null) {
+            skill.setSkillName(dto.getSkillName());
+        }
+        if (dto.getDescription() != null) {
+            skill.setDescription(dto.getDescription());
+        }
+        if (dto.getCategoryId() != null) {
+            Category category = categoryRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+            skill.setCategory(category);
+        }
+        if (dto.getDifficultyLevel() != null) {
+            skill.setDifficultyLevel(dto.getDifficultyLevel());
+        }
+        if (dto.getRecommendedSessions() != null) {
+            skill.setRecommendedSessions(dto.getRecommendedSessions());
+        }
 
         return mapToDTO(repository.save(skill));
     }
@@ -68,12 +92,15 @@ public class SkillServiceImpl implements SkillService {
     }
 
     private SkillDTO mapToDTO(Skill skill){
+        Category category = skill.getCategory();
         return SkillDTO.builder()
                 .skillId(skill.getSkillId())
                 .skillName(skill.getSkillName())
                 .description(skill.getDescription())
-                .category(skill.getCategory())
+                .categoryId(category != null ? category.getCategoryId() : null)
+                .categoryName(category != null ? category.getName() : null)
                 .difficultyLevel(skill.getDifficultyLevel())
+                .recommendedSessions(skill.getRecommendedSessions())
                 .build();
     }
 }

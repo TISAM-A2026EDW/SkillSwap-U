@@ -32,4 +32,6 @@ public class UserSkill {
     private String proficiencyLevel;
 
     private Integer yearsExperience;
+
+    private Integer recommendedSessions;
 }

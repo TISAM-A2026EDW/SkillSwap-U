@@ -17,4 +17,5 @@ public class UserDTO {
     private String email;
     private Double currentCreditBalance;
     private Double reputationScore;
+    private String bio;
 }

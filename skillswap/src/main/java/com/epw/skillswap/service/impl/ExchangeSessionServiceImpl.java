@@ -78,6 +78,24 @@ public class ExchangeSessionServiceImpl
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<ExchangeSessionDTO> getSessionsByTeacherUserId(UUID teacherUserId) {
+        return sessionRepository.findByTeacherUserId(teacherUserId)
+                .stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ExchangeSessionDTO> getSessionsByLearnerUserId(UUID learnerUserId) {
+        return sessionRepository.findByLearnerUserId(learnerUserId)
+                .stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public ExchangeSessionDTO updateSessionStatus(
             UUID sessionId,
             String status) {
