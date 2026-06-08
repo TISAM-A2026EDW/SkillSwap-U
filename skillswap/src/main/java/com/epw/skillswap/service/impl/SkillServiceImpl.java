@@ -37,6 +37,8 @@ public class SkillServiceImpl implements SkillService {
                 .category(category)
                 .difficultyLevel(dto.getDifficultyLevel())
                 .recommendedSessions(dto.getRecommendedSessions())
+                .tags(dto.getTags())
+                .creditsPerSession(dto.getCreditsPerSession())
                 .build();
 
         return mapToDTO(repository.save(skill));
@@ -82,6 +84,12 @@ public class SkillServiceImpl implements SkillService {
         if (dto.getRecommendedSessions() != null) {
             skill.setRecommendedSessions(dto.getRecommendedSessions());
         }
+        if (dto.getTags() != null) {
+            skill.setTags(dto.getTags());
+        }
+        if (dto.getCreditsPerSession() != null) {
+            skill.setCreditsPerSession(dto.getCreditsPerSession());
+        }
 
         return mapToDTO(repository.save(skill));
     }
@@ -101,6 +109,8 @@ public class SkillServiceImpl implements SkillService {
                 .categoryName(category != null ? category.getName() : null)
                 .difficultyLevel(skill.getDifficultyLevel())
                 .recommendedSessions(skill.getRecommendedSessions())
+                .tags(skill.getTags())
+                .creditsPerSession(skill.getCreditsPerSession())
                 .build();
     }
 }

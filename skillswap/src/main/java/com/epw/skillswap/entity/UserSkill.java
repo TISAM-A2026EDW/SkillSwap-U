@@ -34,4 +34,9 @@ public class UserSkill {
     private Integer yearsExperience;
 
     private Integer recommendedSessions;
+
+    private Double creditsPerSession;
+
+    @Builder.Default
+    private Integer sessionsCompleted = 0;
 }

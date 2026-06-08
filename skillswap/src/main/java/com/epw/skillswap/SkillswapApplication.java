@@ -21,8 +21,8 @@ public class SkillswapApplication {
 		return args -> {
 			if (categoryRepository.count() == 0) {
 				List<String> names = List.of(
-						"Matemáticas", "Programación", "Idiomas",
-						"Música", "Arte", "Deporte"
+						"Tecnología", "Ciencias", "Idiomas",
+						"Arte & Diseño", "Negocios", "Humanidades"
 				);
 				for (String name : names) {
 					categoryRepository.save(
