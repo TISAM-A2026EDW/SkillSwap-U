@@ -48,6 +48,7 @@ public class UserSkillServiceImpl implements UserSkillService {
         Skill skill = Skill.builder()
                 .skillName(dto.getSkillName())
                 .category(category)
+                .difficultyLevel(dto.getProficiencyLevel())
                 .recommendedSessions(dto.getRecommendedSessions())
                 .build();
 

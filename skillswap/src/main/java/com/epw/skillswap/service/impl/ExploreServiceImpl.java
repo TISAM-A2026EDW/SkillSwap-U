@@ -23,11 +23,12 @@ public class ExploreServiceImpl implements ExploreService {
     private final UserSkillRepository userSkillRepository;
 
     @Override
-    public List<ExploreItemDTO> getExplore(UUID categoryId, String level, String search, String sort) {
+    public List<ExploreItemDTO> getExplore(UUID categoryId, String level, String search, String sort, UUID excludeUserId) {
 
         List<UserSkill> userSkills = userSkillRepository.findAll();
 
         return userSkills.stream()
+                .filter(us -> excludeUserId == null || !us.getUser().getUserId().equals(excludeUserId))
                 .filter(us -> categoryId == null
                         || (us.getSkill().getCategory() != null
                         && us.getSkill().getCategory().getCategoryId().equals(categoryId)))

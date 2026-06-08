@@ -7,5 +7,5 @@ import java.util.UUID;
 
 public interface ExploreService {
 
-    List<ExploreItemDTO> getExplore(UUID categoryId, String level, String search, String sort);
+    List<ExploreItemDTO> getExplore(UUID categoryId, String level, String search, String sort, UUID excludeUserId);
 }
