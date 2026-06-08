@@ -4,6 +4,7 @@ import com.epw.skillswap.dto.BookedSlotDTO;
 import com.epw.skillswap.dto.BookSessionRequest;
 import com.epw.skillswap.dto.ExchangeSessionDTO;
 import com.epw.skillswap.dto.TeacherAvailabilityDTO;
+import com.epw.skillswap.dto.UserSessionDTO;
 import com.epw.skillswap.service.ExchangeSessionService;
 import com.epw.skillswap.service.TeacherAvailabilityService;
 import com.epw.skillswap.service.UserService;
@@ -85,6 +86,13 @@ public class ExchangeSessionController {
         UUID learnerId = userService.getUserIdByEmail(authentication.getName());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(sessionService.bookSession(learnerId, request));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<List<UserSessionDTO>> getMySessions(
+            Authentication authentication) {
+        UUID userId = userService.getUserIdByEmail(authentication.getName());
+        return ResponseEntity.ok(sessionService.getMySessions(userId));
     }
 
     @GetMapping("/teacher-availability")
