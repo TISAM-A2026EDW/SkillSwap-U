@@ -1,5 +1,6 @@
 package com.epw.skillswap.service.impl;
 
+import com.epw.skillswap.dto.BookedSlotDTO;
 import com.epw.skillswap.dto.BookSessionRequest;
 import com.epw.skillswap.dto.ExchangeSessionDTO;
 import com.epw.skillswap.entity.*;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -182,6 +184,25 @@ public class ExchangeSessionServiceImpl
         session.setStatus(SessionStatus.valueOf(status.toUpperCase()));
 
         return mapToDTO(sessionRepository.save(session));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BookedSlotDTO> getBookedSlotsByTeacherAndDate(UUID teacherUserId, LocalDate date) {
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = date.atTime(LocalTime.MAX);
+        return sessionRepository.findByTeacherUserIdAndScheduledDateBetween(teacherUserId, start, end)
+                .stream()
+                .filter(s -> s.getStatus() != SessionStatus.CANCELLED)
+                .map(s -> {
+                    LocalTime st = s.getScheduledDate().toLocalTime();
+                    LocalTime et = st.plusMinutes(Math.round(s.getDurationHours() * 60));
+                    return BookedSlotDTO.builder()
+                            .startTime(st.toString())
+                            .endTime(et.toString())
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     @Override

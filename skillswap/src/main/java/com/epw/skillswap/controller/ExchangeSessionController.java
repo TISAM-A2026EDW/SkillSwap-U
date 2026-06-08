@@ -1,5 +1,6 @@
 package com.epw.skillswap.controller;
 
+import com.epw.skillswap.dto.BookedSlotDTO;
 import com.epw.skillswap.dto.BookSessionRequest;
 import com.epw.skillswap.dto.ExchangeSessionDTO;
 import com.epw.skillswap.dto.TeacherAvailabilityDTO;
@@ -11,8 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -88,6 +91,13 @@ public class ExchangeSessionController {
     public ResponseEntity<List<TeacherAvailabilityDTO>> getTeacherAvailability(
             @RequestParam UUID teacherUserId) {
         return ResponseEntity.ok(availabilityService.getMyAvailability(teacherUserId));
+    }
+
+    @GetMapping("/booked-slots")
+    public ResponseEntity<List<BookedSlotDTO>> getBookedSlots(
+            @RequestParam UUID teacherUserId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return ResponseEntity.ok(sessionService.getBookedSlotsByTeacherAndDate(teacherUserId, date));
     }
 
     @DeleteMapping("/{id}")
