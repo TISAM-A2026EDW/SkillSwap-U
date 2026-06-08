@@ -1,16 +1,18 @@
 package com.epw.skillswap.service.impl;
 
+import com.epw.skillswap.dto.BookSessionRequest;
 import com.epw.skillswap.dto.ExchangeSessionDTO;
 import com.epw.skillswap.entity.*;
 import com.epw.skillswap.exception.ResourceNotFoundException;
-import com.epw.skillswap.repository.ExchangeSessionRepository;
-import com.epw.skillswap.repository.SkillRepository;
-import com.epw.skillswap.repository.UserRepository;
+import com.epw.skillswap.repository.*;
 import com.epw.skillswap.service.ExchangeSessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -24,6 +26,8 @@ public class ExchangeSessionServiceImpl
     private final ExchangeSessionRepository sessionRepository;
     private final UserRepository userRepository;
     private final SkillRepository skillRepository;
+    private final UserSkillRepository userSkillRepository;
+    private final TeacherAvailabilityRepository availabilityRepository;
 
     @Override
     public ExchangeSessionDTO createSession(
@@ -50,6 +54,77 @@ public class ExchangeSessionServiceImpl
                 .creditsExchanged(dto.getCreditsExchanged())
                 .meetingLink(dto.getMeetingLink())
                 .sessionNotes(dto.getSessionNotes())
+                .status(SessionStatus.PENDING)
+                .build();
+
+        return mapToDTO(sessionRepository.save(session));
+    }
+
+    @Override
+    public ExchangeSessionDTO bookSession(UUID learnerId, BookSessionRequest request) {
+        UserSkill userSkill = userSkillRepository.findById(request.getUserSkillId())
+                .orElseThrow(() -> new ResourceNotFoundException("Skill not found"));
+
+        User teacher = userSkill.getUser();
+        Skill skill = userSkill.getSkill();
+
+        if (teacher.getUserId().equals(learnerId)) {
+            throw new RuntimeException("You cannot book your own skill");
+        }
+
+        User learner = userRepository.findById(learnerId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        LocalDateTime scheduledDate = request.getScheduledDate();
+        LocalTime startTime = scheduledDate.toLocalTime();
+        LocalTime endTime = startTime.plusMinutes(Math.round(request.getDurationHours() * 60));
+
+        if (scheduledDate.isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Scheduled date must be in the future");
+        }
+
+        LocalTime EARLIEST = LocalTime.of(8, 0);
+        LocalTime LATEST = LocalTime.of(19, 0);
+        if (startTime.isBefore(EARLIEST) || endTime.isAfter(LATEST)) {
+            throw new RuntimeException("Sessions must be between 08:00 and 19:00");
+        }
+
+        DayOfWeek dayOfWeek = scheduledDate.getDayOfWeek();
+        List<TeacherAvailability> availabilities = availabilityRepository
+                .findByTeacherUserIdAndDayOfWeek(teacher.getUserId(), dayOfWeek);
+
+        boolean hasSlot = availabilities.stream()
+                .anyMatch(a -> !startTime.isBefore(a.getStartTime()) && !endTime.isAfter(a.getEndTime()));
+        if (!hasSlot) {
+            throw new RuntimeException("Teacher is not available at this time");
+        }
+
+        List<ExchangeSession> overlapping = sessionRepository
+                .findByTeacherUserIdAndScheduledDateBetween(
+                        teacher.getUserId(),
+                        scheduledDate.minusMinutes(1),
+                        scheduledDate.plusMinutes(Math.round(request.getDurationHours() * 60) + 1));
+        overlapping.removeIf(s -> s.getStatus() == SessionStatus.CANCELLED);
+        if (!overlapping.isEmpty()) {
+            throw new RuntimeException("Teacher already has a session at this time");
+        }
+
+        Double creditsExchanged = userSkill.getCreditsPerSession() * request.getDurationHours();
+
+        if (learner.getCurrentCreditBalance() < creditsExchanged) {
+            throw new RuntimeException("Insufficient credits");
+        }
+
+        learner.setCurrentCreditBalance(learner.getCurrentCreditBalance() - creditsExchanged);
+        userRepository.save(learner);
+
+        ExchangeSession session = ExchangeSession.builder()
+                .teacher(teacher)
+                .learner(learner)
+                .skill(skill)
+                .scheduledDate(scheduledDate)
+                .durationHours(request.getDurationHours())
+                .creditsExchanged(creditsExchanged)
                 .status(SessionStatus.PENDING)
                 .build();
 

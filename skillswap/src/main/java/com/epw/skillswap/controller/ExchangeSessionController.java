@@ -1,11 +1,16 @@
 package com.epw.skillswap.controller;
 
+import com.epw.skillswap.dto.BookSessionRequest;
 import com.epw.skillswap.dto.ExchangeSessionDTO;
+import com.epw.skillswap.dto.TeacherAvailabilityDTO;
 import com.epw.skillswap.service.ExchangeSessionService;
+import com.epw.skillswap.service.TeacherAvailabilityService;
+import com.epw.skillswap.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +22,8 @@ import java.util.UUID;
 public class ExchangeSessionController {
 
     private final ExchangeSessionService sessionService;
+    private final TeacherAvailabilityService availabilityService;
+    private final UserService userService;
 
     @PostMapping
     public ResponseEntity<ExchangeSessionDTO> createSession(
@@ -66,6 +73,21 @@ public class ExchangeSessionController {
         return ResponseEntity.ok(
                 sessionService.updateSessionStatus(id, status)
         );
+    }
+
+    @PostMapping("/book")
+    public ResponseEntity<ExchangeSessionDTO> bookSession(
+            @Valid @RequestBody BookSessionRequest request,
+            Authentication authentication) {
+        UUID learnerId = userService.getUserIdByEmail(authentication.getName());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(sessionService.bookSession(learnerId, request));
+    }
+
+    @GetMapping("/teacher-availability")
+    public ResponseEntity<List<TeacherAvailabilityDTO>> getTeacherAvailability(
+            @RequestParam UUID teacherUserId) {
+        return ResponseEntity.ok(availabilityService.getMyAvailability(teacherUserId));
     }
 
     @DeleteMapping("/{id}")
