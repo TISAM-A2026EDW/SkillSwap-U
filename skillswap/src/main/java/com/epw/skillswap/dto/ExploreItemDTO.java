@@ -9,15 +9,20 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SkillDTO {
+public class ExploreItemDTO {
 
+    private UUID userSkillId;
     private UUID skillId;
     private String skillName;
-    private String description;
     private UUID categoryId;
     private String categoryName;
-    private String difficultyLevel;
-    private Integer recommendedSessions;
     private String tags;
+    private String difficultyLevel;
     private Double creditsPerSession;
+    private Integer sessionsCompleted;
+    private Double rating;
+    private UUID teacherUserId;
+    private String teacherFirstName;
+    private String teacherLastName;
+    private String teacherAvatar;
 }

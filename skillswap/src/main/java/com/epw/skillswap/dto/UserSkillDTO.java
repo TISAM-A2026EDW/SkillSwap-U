@@ -19,4 +19,6 @@ public class UserSkillDTO {
     private String categoryName;
     private String proficiencyLevel;
     private Integer recommendedSessions;
+    private Double creditsPerSession;
+    private Integer sessionsCompleted;
 }

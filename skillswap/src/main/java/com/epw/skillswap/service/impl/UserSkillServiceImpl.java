@@ -58,6 +58,7 @@ public class UserSkillServiceImpl implements UserSkillService {
                 .skill(skill)
                 .proficiencyLevel(dto.getProficiencyLevel())
                 .recommendedSessions(dto.getRecommendedSessions())
+                .creditsPerSession(dto.getCreditsPerSession())
                 .build();
 
         userSkill = userSkillRepository.save(userSkill);
@@ -85,6 +86,8 @@ public class UserSkillServiceImpl implements UserSkillService {
                 .categoryName(category != null ? category.getName() : null)
                 .proficiencyLevel(userSkill.getProficiencyLevel())
                 .recommendedSessions(userSkill.getRecommendedSessions())
+                .creditsPerSession(userSkill.getCreditsPerSession())
+                .sessionsCompleted(userSkill.getSessionsCompleted())
                 .build();
     }
 }

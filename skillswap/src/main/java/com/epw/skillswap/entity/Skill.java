@@ -32,4 +32,8 @@ public class Skill {
     private String difficultyLevel;
 
     private Integer recommendedSessions;
+
+    private String tags;
+
+    private Double creditsPerSession;
 }
