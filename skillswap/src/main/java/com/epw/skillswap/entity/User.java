@@ -37,7 +37,7 @@ public class User {
     private String password;
     
     @Builder.Default
-    private Double currentCreditBalance = 0.0;
+    private Double currentCreditBalance = 20.0;
 
     @Builder.Default
     private Double reputationScore = 0.0;
