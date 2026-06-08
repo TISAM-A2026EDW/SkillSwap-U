@@ -3,6 +3,7 @@ package com.epw.skillswap.service;
 import com.epw.skillswap.dto.BookedSlotDTO;
 import com.epw.skillswap.dto.BookSessionRequest;
 import com.epw.skillswap.dto.ExchangeSessionDTO;
+import com.epw.skillswap.dto.UserSessionDTO;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -27,4 +28,6 @@ public interface ExchangeSessionService {
     void deleteSession(UUID sessionId);
 
     List<BookedSlotDTO> getBookedSlotsByTeacherAndDate(UUID teacherUserId, LocalDate date);
+
+    List<UserSessionDTO> getMySessions(UUID userId);
 }

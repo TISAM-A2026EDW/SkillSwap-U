@@ -3,6 +3,7 @@ package com.epw.skillswap.service.impl;
 import com.epw.skillswap.dto.BookedSlotDTO;
 import com.epw.skillswap.dto.BookSessionRequest;
 import com.epw.skillswap.dto.ExchangeSessionDTO;
+import com.epw.skillswap.dto.UserSessionDTO;
 import com.epw.skillswap.entity.*;
 import com.epw.skillswap.exception.ResourceNotFoundException;
 import com.epw.skillswap.repository.*;
@@ -15,6 +16,8 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -30,6 +33,7 @@ public class ExchangeSessionServiceImpl
     private final SkillRepository skillRepository;
     private final UserSkillRepository userSkillRepository;
     private final TeacherAvailabilityRepository availabilityRepository;
+    private final ReviewRepository reviewRepository;
 
     @Override
     public ExchangeSessionDTO createSession(
@@ -184,6 +188,55 @@ public class ExchangeSessionServiceImpl
         session.setStatus(SessionStatus.valueOf(status.toUpperCase()));
 
         return mapToDTO(sessionRepository.save(session));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserSessionDTO> getMySessions(UUID userId) {
+        List<ExchangeSession> asTeacher = sessionRepository.findByTeacherUserId(userId);
+        List<ExchangeSession> asLearner = sessionRepository.findByLearnerUserId(userId);
+
+        List<UserSessionDTO> result = new ArrayList<>();
+
+        for (ExchangeSession s : asTeacher) {
+            result.add(mapToUserSessionDTO(s, "TEACHER", s.getLearner(), userId));
+        }
+        for (ExchangeSession s : asLearner) {
+            result.add(mapToUserSessionDTO(s, "LEARNER", s.getTeacher(), userId));
+        }
+
+        result.sort(Comparator.comparing(UserSessionDTO::getScheduledDate).reversed());
+        return result;
+    }
+
+    private UserSessionDTO mapToUserSessionDTO(ExchangeSession session, String role, User partner, UUID currentUserId) {
+        Integer rating = null;
+        List<Review> reviews = reviewRepository.findBySessionSessionId(session.getSessionId());
+        if (!reviews.isEmpty()) {
+            rating = reviews.getFirst().getRating();
+        }
+
+        double credits = session.getCreditsExchanged() != null ? session.getCreditsExchanged() : 0.0;
+        if ("LEARNER".equals(role)) {
+            credits = -credits;
+        }
+
+        String avatar = (partner.getFirstName().charAt(0) + "" + partner.getLastName().charAt(0)).toUpperCase();
+
+        return UserSessionDTO.builder()
+                .sessionId(session.getSessionId())
+                .skillName(session.getSkill().getSkillName())
+                .partnerFirstName(partner.getFirstName())
+                .partnerLastName(partner.getLastName())
+                .partnerAvatar(avatar)
+                .scheduledDate(session.getScheduledDate())
+                .durationHours(session.getDurationHours())
+                .creditsExchanged(credits)
+                .status(session.getStatus().name())
+                .role(role)
+                .rating(rating)
+                .meetingLink(session.getMeetingLink())
+                .build();
     }
 
     @Override
